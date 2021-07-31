@@ -1,0 +1,1298 @@
+[
+  {
+    "id": "68ba0374.820ffc",
+    "type": "tab",
+    "label": "Pool Panel",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "f8fea2a7.02a44",
+    "type": "http request",
+    "z": "68ba0374.820ffc",
+    "name": "Pool-Panel-Login",
+    "method": "POST",
+    "ret": "obj",
+    "paytoqs": "body",
+    "url": "http://www.fzdbiology.com:8080/scadaiot/user/loginUser.do",
+    "tls": "",
+    "persist": true,
+    "proxy": "",
+    "authType": "",
+    "x": 430,
+    "y": 100,
+    "wires": [["f52cd9cd.6a5c38"]]
+  },
+  {
+    "id": "776242ce.025e2c",
+    "type": "change",
+    "z": "68ba0374.820ffc",
+    "name": "Pool-Panel-Login-Settings",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "email={USER}%40{DOMAIN}&password={PASSWORD}",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "headers.Content-Type",
+        "pt": "msg",
+        "to": "application/x-www-form-urlencoded",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "headers.User-Agent",
+        "pt": "msg",
+        "to": "okhttp/3.8.1",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 200,
+    "y": 140,
+    "wires": [["f8fea2a7.02a44"]]
+  },
+  {
+    "id": "1c18c4ac.601e6b",
+    "type": "inject",
+    "z": "68ba0374.820ffc",
+    "name": "",
+    "props": [],
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 90,
+    "y": 20,
+    "wires": [["c42733bb.20536"]]
+  },
+  {
+    "id": "7608986b.d2a078",
+    "type": "debug",
+    "z": "68ba0374.820ffc",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 950,
+    "y": 100,
+    "wires": []
+  },
+  {
+    "id": "e2740b7.9d2b8f8",
+    "type": "change",
+    "z": "68ba0374.820ffc",
+    "name": "Pool-Panel-Info-Settings",
+    "rules": [
+      {
+        "t": "set",
+        "p": "headers.userId",
+        "pt": "msg",
+        "to": "userId",
+        "tot": "flow"
+      },
+      {
+        "t": "set",
+        "p": "headers.token",
+        "pt": "msg",
+        "to": "token",
+        "tot": "flow"
+      },
+      {
+        "t": "set",
+        "p": "headers.User-Agent",
+        "pt": "msg",
+        "to": "okhttp/3.8.1",
+        "tot": "str"
+      },
+      { "t": "set", "p": "rtuId", "pt": "msg", "to": "rtuId", "tot": "flow" }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 370,
+    "y": 321,
+    "wires": [["40dd69c1.f9a848"]]
+  },
+  {
+    "id": "85e46845.35a128",
+    "type": "http request",
+    "z": "68ba0374.820ffc",
+    "name": "Pool-Panel-Devices",
+    "method": "GET",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "www.fzdbiology.com:8080/scadaiot/rtuModel/getRtuView.do?userId={{{userId}}}",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "authType": "",
+    "x": 720,
+    "y": 180,
+    "wires": [["ab9d7b77.5615d8"]]
+  },
+  {
+    "id": "5f34926b.dac62c",
+    "type": "switch",
+    "z": "68ba0374.820ffc",
+    "name": "Validate-Info-Response",
+    "property": "payload.resultCode",
+    "propertyType": "msg",
+    "rules": [
+      { "t": "eq", "v": "1", "vt": "str" },
+      { "t": "eq", "v": "-1", "vt": "str" }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 790,
+    "y": 321,
+    "wires": [["8b564c5.bbee8b", "5774ea38.7f2ae4"], ["637f6ab9.a7dd14"]]
+  },
+  {
+    "id": "864f1018.22c61",
+    "type": "switch",
+    "z": "68ba0374.820ffc",
+    "name": "Retry-Request",
+    "property": "retry",
+    "propertyType": "flow",
+    "rules": [
+      { "t": "eq", "v": "Info", "vt": "str" },
+      { "t": "eq", "v": "Command", "vt": "str" }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 160,
+    "y": 261,
+    "wires": [["e2740b7.9d2b8f8"], ["25b2aa7c.c35ad6"]]
+  },
+  {
+    "id": "f52cd9cd.6a5c38",
+    "type": "function",
+    "z": "68ba0374.820ffc",
+    "name": "Save-Token",
+    "func": "flow.set('userId',msg.payload.data.userId);\nflow.set('token',msg.payload.data.token);\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "x": 650,
+    "y": 120,
+    "wires": [["aba9030a.81718", "7608986b.d2a078"]]
+  },
+  {
+    "id": "aba9030a.81718",
+    "type": "change",
+    "z": "68ba0374.820ffc",
+    "name": "Pool-Panel-Devices-Settings",
+    "rules": [
+      { "t": "set", "p": "userId", "pt": "msg", "to": "userId", "tot": "flow" },
+      {
+        "t": "set",
+        "p": "headers.userId",
+        "pt": "msg",
+        "to": "userId",
+        "tot": "flow"
+      },
+      {
+        "t": "set",
+        "p": "headers.token",
+        "pt": "msg",
+        "to": "token",
+        "tot": "flow"
+      },
+      {
+        "t": "set",
+        "p": "headers.User-Agent",
+        "pt": "msg",
+        "to": "okhttp/3.8.1",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 480,
+    "y": 180,
+    "wires": [["85e46845.35a128"]]
+  },
+  {
+    "id": "ab9d7b77.5615d8",
+    "type": "function",
+    "z": "68ba0374.820ffc",
+    "name": "Save-Device",
+    "func": "flow.set('rtuCode',msg.payload.data[0].rtuCode);\nflow.set('rtuName',msg.payload.data[0].rtuName);\nflow.set('rtuAlias',msg.payload.data[0].rtuAlias);\nflow.set('rtuId',msg.payload.data[0].rtuId);\nflow.set('rtuUpdateDate',msg.payload.data[0].updateDate);\nmsg.payload = {\n    \"rtuCode\": flow.get('rtuCode'),\n    \"rtuName\": flow.get('rtuName'),\n    \"rtuAlias\": flow.get('rtuAlias'),\n    \"rtuId\": flow.get('rtuId'),\n    \"rtuUpdateDate\": flow.get('rtuUpdateDate')\n}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "x": 910,
+    "y": 180,
+    "wires": [["7608986b.d2a078", "864f1018.22c61"]]
+  },
+  {
+    "id": "40dd69c1.f9a848",
+    "type": "http request",
+    "z": "68ba0374.820ffc",
+    "name": "Pool-Panel-Info",
+    "method": "GET",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "http://www.fzdbiology.com:8080/scadaiot/rtuModel/getRtuRealTime.do?rtuId={{{rtuId}}}",
+    "tls": "",
+    "persist": true,
+    "proxy": "",
+    "authType": "",
+    "x": 580,
+    "y": 321,
+    "wires": [["5f34926b.dac62c", "d2a5825f.29ddd"]]
+  },
+  {
+    "id": "5774ea38.7f2ae4",
+    "type": "http request",
+    "z": "68ba0374.820ffc",
+    "name": "Pool-Panel-Fault",
+    "method": "GET",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "http://www.fzdbiology.com:8080/scadaiot/rtuReal/getRtuFaultCode.do?rtuId={{{rtuId}}}&start=0&pageSize=20",
+    "tls": "",
+    "persist": true,
+    "proxy": "",
+    "authType": "",
+    "x": 690,
+    "y": 381,
+    "wires": [["bcc734df.3a9398"]]
+  },
+  {
+    "id": "25b2aa7c.c35ad6",
+    "type": "switch",
+    "z": "68ba0374.820ffc",
+    "name": "Retry-Commands",
+    "property": "command",
+    "propertyType": "flow",
+    "rules": [
+      { "t": "eq", "v": "power", "vt": "str" },
+      { "t": "eq", "v": "set-function", "vt": "str" },
+      { "t": "eq", "v": "set-mode", "vt": "str" },
+      { "t": "eq", "v": "set-temp", "vt": "str" }
+    ],
+    "checkall": "false",
+    "repair": false,
+    "outputs": 4,
+    "x": 330,
+    "y": 420,
+    "wires": [
+      ["8756b729.e482a8"],
+      ["ca5d92ac.a9ccc"],
+      ["18bcbf4d.7a1fa1"],
+      ["a6533c56.1c627"]
+    ]
+  },
+  {
+    "id": "d2a5825f.29ddd",
+    "type": "debug",
+    "z": "68ba0374.820ffc",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1150,
+    "y": 241,
+    "wires": []
+  },
+  {
+    "id": "3b66b78d.d9e888",
+    "type": "inject",
+    "z": "68ba0374.820ffc",
+    "name": "",
+    "props": [],
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": "10",
+    "topic": "",
+    "x": 90,
+    "y": 321,
+    "wires": [["9f2cca97.2b7168"]]
+  },
+  {
+    "id": "637f6ab9.a7dd14",
+    "type": "function",
+    "z": "68ba0374.820ffc",
+    "name": "Set-Retry-Info",
+    "func": "flow.set('retry',\"Info\");\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "x": 420,
+    "y": 261,
+    "wires": [["776242ce.025e2c"]]
+  },
+  {
+    "id": "9f2cca97.2b7168",
+    "type": "trigger",
+    "z": "68ba0374.820ffc",
+    "name": "every 60secs",
+    "op1": "",
+    "op2": "",
+    "op1type": "pay",
+    "op2type": "nul",
+    "duration": "-60",
+    "extend": false,
+    "overrideDelay": false,
+    "units": "s",
+    "reset": "",
+    "bytopic": "all",
+    "topic": "topic",
+    "outputs": 1,
+    "x": 110,
+    "y": 381,
+    "wires": [["e2740b7.9d2b8f8"]]
+  },
+  {
+    "id": "4084a4d.f0aeb5c",
+    "type": "mqtt out",
+    "z": "68ba0374.820ffc",
+    "name": "Publish-Info-MQTT",
+    "topic": "",
+    "qos": "",
+    "retain": "",
+    "broker": "1d0afe39.ff6522",
+    "x": 1810,
+    "y": 381,
+    "wires": []
+  },
+  {
+    "id": "1867caca.41e955",
+    "type": "json",
+    "z": "68ba0374.820ffc",
+    "name": "Convert-To-JSON",
+    "property": "tele",
+    "action": "str",
+    "pretty": false,
+    "x": 1590,
+    "y": 321,
+    "wires": [["1eec1fb1.d4487"]]
+  },
+  {
+    "id": "8fbca3ac.5fbec",
+    "type": "change",
+    "z": "68ba0374.820ffc",
+    "name": "Set-Tele-Data",
+    "rules": [
+      {
+        "t": "set",
+        "p": "tele.POWER",
+        "pt": "msg",
+        "to": "payload.data.switch",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "tele.MODE",
+        "pt": "msg",
+        "to": "payload.data.model",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "tele.HEATTEMP",
+        "pt": "msg",
+        "to": "payload.data.heattemp",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "tele.AUTOTEMP",
+        "pt": "msg",
+        "to": "payload.data.autotemp",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "tele.COOLTEMP",
+        "pt": "msg",
+        "to": "payload.data.cooltemp",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "tele.BOOST",
+        "pt": "msg",
+        "to": "payload.data.boost",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "tele.SILENCE",
+        "pt": "msg",
+        "to": "payload.data.silence",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "tele.COMPRESOR",
+        "pt": "msg",
+        "to": "payload.data.pa15",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "tele.AMBIENTTEMP",
+        "pt": "msg",
+        "to": "payload.data.ap2",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "tele.INLETTEMP",
+        "pt": "msg",
+        "to": "payload.data.pa10",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "tele.OUTPUTTEMP",
+        "pt": "msg",
+        "to": "payload.data.ap3",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "tele.MALFUNTION",
+        "pt": "msg",
+        "to": "payload.data.pa13",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "tele.FUNCTION",
+        "pt": "msg",
+        "to": "payload.data.function",
+        "tot": "msg"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1400,
+    "y": 321,
+    "wires": [["1867caca.41e955"]]
+  },
+  {
+    "id": "1eec1fb1.d4487",
+    "type": "change",
+    "z": "68ba0374.820ffc",
+    "name": "Set-Tele-Data-Topic",
+    "rules": [
+      { "t": "set", "p": "payload", "pt": "msg", "to": "tele", "tot": "msg" },
+      {
+        "t": "set",
+        "p": "topic",
+        "pt": "msg",
+        "to": "tele/pool-panel/info",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1800,
+    "y": 321,
+    "wires": [["4084a4d.f0aeb5c", "d2a5825f.29ddd"]]
+  },
+  {
+    "id": "8b564c5.bbee8b",
+    "type": "json",
+    "z": "68ba0374.820ffc",
+    "name": "Parse-Info-Data",
+    "property": "payload.data",
+    "action": "",
+    "pretty": false,
+    "x": 1040,
+    "y": 321,
+    "wires": [["a8266012.7ff49"]]
+  },
+  {
+    "id": "69f4732f.f61d9c",
+    "type": "change",
+    "z": "68ba0374.820ffc",
+    "name": "Set-Tele-Fault-Data",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "payload.data",
+        "tot": "msg"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1150,
+    "y": 421,
+    "wires": [["b6007129.dc63f"]]
+  },
+  {
+    "id": "bcc734df.3a9398",
+    "type": "switch",
+    "z": "68ba0374.820ffc",
+    "name": "Validate-Fault-Response",
+    "property": "payload.resultCode",
+    "propertyType": "msg",
+    "rules": [
+      { "t": "eq", "v": "0", "vt": "num" },
+      { "t": "eq", "v": "1", "vt": "num" }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 910,
+    "y": 381,
+    "wires": [["e8c06b87.3dc698"], ["69f4732f.f61d9c"]]
+  },
+  {
+    "id": "e8c06b87.3dc698",
+    "type": "change",
+    "z": "68ba0374.820ffc",
+    "name": "Set-Tele-Fault-None",
+    "rules": [
+      { "t": "set", "p": "payload", "pt": "msg", "to": "{}", "tot": "str" }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1160,
+    "y": 381,
+    "wires": [["b6007129.dc63f"]]
+  },
+  {
+    "id": "b6007129.dc63f",
+    "type": "change",
+    "z": "68ba0374.820ffc",
+    "name": "Set-Tele-Data-Fault-Topic",
+    "rules": [
+      {
+        "t": "set",
+        "p": "topic",
+        "pt": "msg",
+        "to": "tele/pool-panel/fault",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1450,
+    "y": 401,
+    "wires": [["4084a4d.f0aeb5c", "d2a5825f.29ddd"]]
+  },
+  {
+    "id": "a50724b3.acdf38",
+    "type": "mqtt in",
+    "z": "68ba0374.820ffc",
+    "name": "Command Pool-Panel-Power",
+    "topic": "cmnd/pool-panel/POWER",
+    "qos": "2",
+    "datatype": "auto",
+    "broker": "1d0afe39.ff6522",
+    "x": 160,
+    "y": 510,
+    "wires": [["8756b729.e482a8"]]
+  },
+  {
+    "id": "9f1773c7.862fe",
+    "type": "debug",
+    "z": "68ba0374.820ffc",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1730,
+    "y": 437,
+    "wires": []
+  },
+  {
+    "id": "a8266012.7ff49",
+    "type": "function",
+    "z": "68ba0374.820ffc",
+    "name": "Fix-States",
+    "func": "if (msg.payload.data.switch==0)\n    msg.payload.data.switch=\"OFF\";\nif (msg.payload.data.switch==1)\n    msg.payload.data.switch=\"ON\";\nvar functionValue;\nif (msg.payload.data.boost==0 && msg.payload.data.silence==0)\n    functionValue=4;\nif (msg.payload.data.boost==1 && msg.payload.data.silence==0)\n    functionValue=2;\nif (msg.payload.data.boost==0 && msg.payload.data.silence==1)\n    functionValue=1;\nmsg.payload.data.function = functionValue;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "x": 1230,
+    "y": 321,
+    "wires": [["8fbca3ac.5fbec"]]
+  },
+  {
+    "id": "785223f8.2fbf1c",
+    "type": "change",
+    "z": "68ba0374.820ffc",
+    "name": "Pool-Panel-Power-Settings",
+    "rules": [
+      {
+        "t": "set",
+        "p": "headers.userId",
+        "pt": "msg",
+        "to": "userId",
+        "tot": "flow"
+      },
+      {
+        "t": "set",
+        "p": "headers.token",
+        "pt": "msg",
+        "to": "token",
+        "tot": "flow"
+      },
+      {
+        "t": "set",
+        "p": "headers.User-Agent",
+        "pt": "msg",
+        "to": "okhttp/3.8.1",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "payload",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "headers.Content-Type",
+        "pt": "msg",
+        "to": "application/x-www-form-urlencoded",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 720,
+    "y": 510,
+    "wires": [["6bcee58d.fde82c"]]
+  },
+  {
+    "id": "8756b729.e482a8",
+    "type": "function",
+    "z": "68ba0374.820ffc",
+    "name": "Power-Command",
+    "func": "if (msg.payload==\"OFF\")\n    flow.set('powerChange',0);\nif (msg.payload==\"ON\")\n    flow.set('powerChange',1);\nvar switchValue = flow.get('powerChange');\nvar rtuCodeValue = flow.get('rtuCode');\nmsg.payload = \"code=switch&value=\";\nmsg.payload += switchValue;\nmsg.payload += \"&addr=2001&rtuCode=\"\nmsg.payload += rtuCodeValue;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "x": 490,
+    "y": 500,
+    "wires": [["785223f8.2fbf1c"]]
+  },
+  {
+    "id": "6bcee58d.fde82c",
+    "type": "http request",
+    "z": "68ba0374.820ffc",
+    "name": "Pool-Panel-Power",
+    "method": "POST",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "http://www.fzdbiology.com:8080/scadaiot/rtuModel/saveCode.do",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "authType": "",
+    "x": 950,
+    "y": 510,
+    "wires": [["762a72e.cb02f8c", "9f1773c7.862fe"]]
+  },
+  {
+    "id": "762a72e.cb02f8c",
+    "type": "switch",
+    "z": "68ba0374.820ffc",
+    "name": "Validate-Power-Response",
+    "property": "payload.resultCode",
+    "propertyType": "msg",
+    "rules": [
+      { "t": "eq", "v": "-1", "vt": "num" },
+      { "t": "eq", "v": "1", "vt": "num" },
+      { "t": "eq", "v": "0", "vt": "str" }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 3,
+    "x": 1190,
+    "y": 510,
+    "wires": [["fda11060.f793f"], [], ["e2740b7.9d2b8f8"]]
+  },
+  {
+    "id": "fda11060.f793f",
+    "type": "function",
+    "z": "68ba0374.820ffc",
+    "name": "Set-Retry-Power",
+    "func": "flow.set('retry',\"Command\");\nflow.set('command',\"power\");\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "x": 1450,
+    "y": 497,
+    "wires": [["776242ce.025e2c"]]
+  },
+  {
+    "id": "ca5d92ac.a9ccc",
+    "type": "function",
+    "z": "68ba0374.820ffc",
+    "name": "Function-Command",
+    "func": "var functionValue = flow.get('functionSelect');\nvar rtuCodeValue = flow.get('rtuCode');\nmsg.payload = \"code=function&value=\";\nmsg.payload += functionValue;\nmsg.payload += \"&addr=2002&rtuCode=\"\nmsg.payload += rtuCodeValue;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "x": 700,
+    "y": 598,
+    "wires": [["e475155a.b468e8"]]
+  },
+  {
+    "id": "171eae14.3f5122",
+    "type": "mqtt in",
+    "z": "68ba0374.820ffc",
+    "name": "Command Pool-Panel-Function",
+    "topic": "cmnd/pool-panel/function",
+    "qos": "2",
+    "datatype": "auto",
+    "broker": "1d0afe39.ff6522",
+    "x": 170,
+    "y": 597,
+    "wires": [["ced41f68.e035e", "2337a2eb.4c5f8e"]]
+  },
+  {
+    "id": "ced41f68.e035e",
+    "type": "function",
+    "z": "68ba0374.820ffc",
+    "name": "Select-Function",
+    "func": "if (msg.payload==1 || msg.payload==2 || msg.payload==4)\n    flow.set('functionSelect',msg.payload);\n    return msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "x": 440,
+    "y": 597,
+    "wires": [["ca5d92ac.a9ccc"]]
+  },
+  {
+    "id": "e475155a.b468e8",
+    "type": "change",
+    "z": "68ba0374.820ffc",
+    "name": "Pool-Panel-Function-Settings",
+    "rules": [
+      {
+        "t": "set",
+        "p": "headers.userId",
+        "pt": "msg",
+        "to": "userId",
+        "tot": "flow"
+      },
+      {
+        "t": "set",
+        "p": "headers.token",
+        "pt": "msg",
+        "to": "token",
+        "tot": "flow"
+      },
+      {
+        "t": "set",
+        "p": "headers.User-Agent",
+        "pt": "msg",
+        "to": "okhttp/3.8.1",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "payload",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "headers.Content-Type",
+        "pt": "msg",
+        "to": "application/x-www-form-urlencoded",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 970,
+    "y": 598,
+    "wires": [["9db3757f.ac6f28"]]
+  },
+  {
+    "id": "9db3757f.ac6f28",
+    "type": "http request",
+    "z": "68ba0374.820ffc",
+    "name": "Pool-Panel-Function",
+    "method": "POST",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "http://www.fzdbiology.com:8080/scadaiot/rtuModel/saveCode.do",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "authType": "",
+    "x": 1220,
+    "y": 598,
+    "wires": [["9524c0b7.d7fe4", "9f1773c7.862fe"]]
+  },
+  {
+    "id": "9524c0b7.d7fe4",
+    "type": "switch",
+    "z": "68ba0374.820ffc",
+    "name": "Validate-Function-Response",
+    "property": "payload.resultCode",
+    "propertyType": "msg",
+    "rules": [
+      { "t": "eq", "v": "-1", "vt": "num" },
+      { "t": "eq", "v": "1", "vt": "num" },
+      { "t": "eq", "v": "0", "vt": "str" }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 3,
+    "x": 1460,
+    "y": 598,
+    "wires": [["136e321a.0585de"], ["e2740b7.9d2b8f8"], ["e2740b7.9d2b8f8"]]
+  },
+  {
+    "id": "136e321a.0585de",
+    "type": "function",
+    "z": "68ba0374.820ffc",
+    "name": "Set-Retry-Function",
+    "func": "flow.set('retry',\"Command\");\nflow.set('command',\"set-function\");\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "x": 1730,
+    "y": 577,
+    "wires": [["776242ce.025e2c"]]
+  },
+  {
+    "id": "dbc282fa.a5bd5",
+    "type": "mqtt in",
+    "z": "68ba0374.820ffc",
+    "name": "Command Pool-Panel-Mode",
+    "topic": "cmnd/pool-panel/mode",
+    "qos": "2",
+    "datatype": "auto",
+    "broker": "1d0afe39.ff6522",
+    "x": 160,
+    "y": 685,
+    "wires": [["239d2125.20d9fe", "2337a2eb.4c5f8e"]]
+  },
+  {
+    "id": "18bcbf4d.7a1fa1",
+    "type": "function",
+    "z": "68ba0374.820ffc",
+    "name": "Mode-Command",
+    "func": "var modeValue = flow.get('modeSelect');\nvar rtuCodeValue = flow.get('rtuCode');\nmsg.payload = \"code=model&value=\";\nmsg.payload += modeValue;\nmsg.payload += \"&addr=2000&rtuCode=\"\nmsg.payload += rtuCodeValue;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "x": 610,
+    "y": 685,
+    "wires": [["e7f4bac1.236618"]]
+  },
+  {
+    "id": "239d2125.20d9fe",
+    "type": "function",
+    "z": "68ba0374.820ffc",
+    "name": "Select-Mode",
+    "func": "if (msg.payload==1 || msg.payload==2 || msg.payload==4)\n    flow.set('modeSelect',msg.payload);\n    return msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "x": 390,
+    "y": 680,
+    "wires": [["18bcbf4d.7a1fa1"]]
+  },
+  {
+    "id": "e7f4bac1.236618",
+    "type": "change",
+    "z": "68ba0374.820ffc",
+    "name": "Pool-Panel-Mode-Settings",
+    "rules": [
+      {
+        "t": "set",
+        "p": "headers.userId",
+        "pt": "msg",
+        "to": "userId",
+        "tot": "flow"
+      },
+      {
+        "t": "set",
+        "p": "headers.token",
+        "pt": "msg",
+        "to": "token",
+        "tot": "flow"
+      },
+      {
+        "t": "set",
+        "p": "headers.User-Agent",
+        "pt": "msg",
+        "to": "okhttp/3.8.1",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "payload",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "headers.Content-Type",
+        "pt": "msg",
+        "to": "application/x-www-form-urlencoded",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 840,
+    "y": 685,
+    "wires": [["3f827ae9.a02416"]]
+  },
+  {
+    "id": "3f827ae9.a02416",
+    "type": "http request",
+    "z": "68ba0374.820ffc",
+    "name": "Pool-Panel-Mode",
+    "method": "POST",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "http://www.fzdbiology.com:8080/scadaiot/rtuModel/saveCode.do",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "authType": "",
+    "x": 1070,
+    "y": 685,
+    "wires": [["9882b467.d5cf58", "9f1773c7.862fe"]]
+  },
+  {
+    "id": "9882b467.d5cf58",
+    "type": "switch",
+    "z": "68ba0374.820ffc",
+    "name": "Validate-Mode-Response",
+    "property": "payload.resultCode",
+    "propertyType": "msg",
+    "rules": [
+      { "t": "eq", "v": "-1", "vt": "num" },
+      { "t": "eq", "v": "1", "vt": "num" },
+      { "t": "eq", "v": "0", "vt": "str" }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 3,
+    "x": 1290,
+    "y": 685,
+    "wires": [["36d0f4d2.3e1acc"], [], ["e2740b7.9d2b8f8"]]
+  },
+  {
+    "id": "36d0f4d2.3e1acc",
+    "type": "function",
+    "z": "68ba0374.820ffc",
+    "name": "Set-Retry-Mode",
+    "func": "flow.set('retry',\"Command\");\nflow.set('command',\"set-mode\");\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "x": 1540,
+    "y": 671,
+    "wires": [["776242ce.025e2c"]]
+  },
+  {
+    "id": "fe9b21b0.2db1e",
+    "type": "mqtt in",
+    "z": "68ba0374.820ffc",
+    "name": "Command Pool-Panel-AutoTemp",
+    "topic": "cmnd/pool-panel/autotemp",
+    "qos": "2",
+    "datatype": "auto",
+    "broker": "1d0afe39.ff6522",
+    "x": 170,
+    "y": 880,
+    "wires": [["8c186878.57b8a8", "2337a2eb.4c5f8e"]]
+  },
+  {
+    "id": "8c186878.57b8a8",
+    "type": "function",
+    "z": "68ba0374.820ffc",
+    "name": "Set-Temp",
+    "func": "if (msg.payload>=16 && msg.payload<=40)\n    flow.set('setTemp',msg.payload);\n    var tempType = msg.topic.split('/');\n    flow.set('tempSelect',tempType[2]);\n    return msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "x": 400,
+    "y": 818,
+    "wires": [["a6533c56.1c627"]]
+  },
+  {
+    "id": "a6533c56.1c627",
+    "type": "function",
+    "z": "68ba0374.820ffc",
+    "name": "SetTemp-Command",
+    "func": "var tempValue = flow.get('setTemp');\nvar tempSelect = flow.get('tempSelect');\nvar rtuCodeValue = flow.get('rtuCode');\nmsg.payload = \"code=\";\nmsg.payload += tempSelect;\nmsg.payload += \"&value=\";\nmsg.payload += tempValue;\nmsg.payload += \"&addr=2004&rtuCode=\"\nmsg.payload += rtuCodeValue;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "x": 620,
+    "y": 818,
+    "wires": [["ed16240f.d75478", "2337a2eb.4c5f8e"]]
+  },
+  {
+    "id": "ed16240f.d75478",
+    "type": "change",
+    "z": "68ba0374.820ffc",
+    "name": "Pool-Panel-Temp-Settings",
+    "rules": [
+      {
+        "t": "set",
+        "p": "headers.userId",
+        "pt": "msg",
+        "to": "userId",
+        "tot": "flow"
+      },
+      {
+        "t": "set",
+        "p": "headers.token",
+        "pt": "msg",
+        "to": "token",
+        "tot": "flow"
+      },
+      {
+        "t": "set",
+        "p": "headers.User-Agent",
+        "pt": "msg",
+        "to": "okhttp/3.8.1",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "payload",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "headers.Content-Type",
+        "pt": "msg",
+        "to": "application/x-www-form-urlencoded",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 860,
+    "y": 818,
+    "wires": [["8d0318ac.cc8018"]]
+  },
+  {
+    "id": "8d0318ac.cc8018",
+    "type": "http request",
+    "z": "68ba0374.820ffc",
+    "name": "Pool-Panel-Temp",
+    "method": "POST",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "http://www.fzdbiology.com:8080/scadaiot/rtuModel/saveCode.do",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "authType": "",
+    "x": 1090,
+    "y": 818,
+    "wires": [["2daff2e6.8f228e", "9f1773c7.862fe"]]
+  },
+  {
+    "id": "2daff2e6.8f228e",
+    "type": "switch",
+    "z": "68ba0374.820ffc",
+    "name": "Validate-Temp-Response",
+    "property": "payload.resultCode",
+    "propertyType": "msg",
+    "rules": [
+      { "t": "eq", "v": "-1", "vt": "num" },
+      { "t": "eq", "v": "1", "vt": "num" },
+      { "t": "eq", "v": "0", "vt": "str" }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 3,
+    "x": 1310,
+    "y": 818,
+    "wires": [["dead0692.5164b8"], [], ["e2740b7.9d2b8f8"]]
+  },
+  {
+    "id": "dead0692.5164b8",
+    "type": "function",
+    "z": "68ba0374.820ffc",
+    "name": "Set-Retry-Temp",
+    "func": "flow.set('retry',\"Command\");\nflow.set('command',\"set-temp\");\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "x": 1560,
+    "y": 797,
+    "wires": [["776242ce.025e2c"]]
+  },
+  {
+    "id": "bc82aeaa.dc575",
+    "type": "mqtt in",
+    "z": "68ba0374.820ffc",
+    "name": "Command Pool-Panel-CoolTemp",
+    "topic": "cmnd/pool-panel/cooltemp",
+    "qos": "2",
+    "datatype": "auto",
+    "broker": "1d0afe39.ff6522",
+    "x": 170,
+    "y": 818,
+    "wires": [["8c186878.57b8a8", "2337a2eb.4c5f8e"]]
+  },
+  {
+    "id": "66d17279.d4cb8c",
+    "type": "mqtt in",
+    "z": "68ba0374.820ffc",
+    "name": "Command Pool-Panel-HeatTemp",
+    "topic": "cmnd/pool-panel/heattemp",
+    "qos": "2",
+    "datatype": "auto",
+    "broker": "1d0afe39.ff6522",
+    "x": 170,
+    "y": 760,
+    "wires": [["8c186878.57b8a8", "2337a2eb.4c5f8e"]]
+  },
+  {
+    "id": "2337a2eb.4c5f8e",
+    "type": "debug",
+    "z": "68ba0374.820ffc",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 520,
+    "y": 960,
+    "wires": []
+  },
+  {
+    "id": "c42733bb.20536",
+    "type": "trigger",
+    "z": "68ba0374.820ffc",
+    "name": "every 24hrs",
+    "op1": "",
+    "op2": "",
+    "op1type": "pay",
+    "op2type": "nul",
+    "duration": "-24",
+    "extend": false,
+    "overrideDelay": false,
+    "units": "hr",
+    "reset": "",
+    "bytopic": "all",
+    "topic": "topic",
+    "outputs": 1,
+    "x": 110,
+    "y": 80,
+    "wires": [["776242ce.025e2c"]]
+  },
+  {
+    "id": "1d0afe39.ff6522",
+    "type": "mqtt-broker",
+    "name": "Mosquitto-MQTT",
+    "broker": "mosquitto-eclipse-mosquitto.mosquitto",
+    "port": "1884",
+    "tls": "",
+    "clientid": "Node-RED",
+    "usetls": false,
+    "compatmode": false,
+    "keepalive": "60",
+    "cleansession": true,
+    "birthTopic": "",
+    "birthQos": "0",
+    "birthRetain": "false",
+    "birthPayload": "",
+    "closeTopic": "",
+    "closeQos": "0",
+    "closeRetain": "false",
+    "closePayload": "",
+    "willTopic": "",
+    "willQos": "0",
+    "willRetain": "false",
+    "willPayload": ""
+  }
+]
