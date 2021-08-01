@@ -4,7 +4,7 @@ This is a flow for integration with Pool Panel App, to control smart Pool Heatin
 ### Usage
 Update line 36 with you own credentials:
 
- ´´"to": "email={USER}%40{DOMAIN}&password={PASSWORD}",´´
+ ``"to": "email={USER}%40{DOMAIN}&password={PASSWORD}",``
 
 Replace:
 - {USER}
