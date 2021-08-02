@@ -24,7 +24,9 @@ Replace:
 The flow is configured to resolve authentication every 24 hours or when the token needs to be renewed, and get all status automatically every 60 secs.
 
 Status information published to MQTT (Names are case sensitive) on ``tele/pool-panel/info`` topic, and the message is a JSON with the fllowing properties:
-| Property Name | Data | Description |
+
+| Property Name | Values | Description |
+| ------------- | ------ | ----------- |
 | POWER | ON,OFF | Power Status of the heat pump |
 | MODE | 1 = Cool, 2 = Heat, 4 = Auto | Operation mode | 
 | HEATTEMP | 16-34 | Target temperature selected for heat mode |
@@ -40,7 +42,9 @@ Status information published to MQTT (Names are case sensitive) on ``tele/pool-p
 | MALFUNTION | Text | Error information from heat pump controller | 
 
 Commands are subscribed on MQTT with the topic ``cmnd/pool-panel/{PROPERTY}`` in text format, using the following commands (names are case sensitive):
-| Property name | Data | Descripction |
+
+| Property name | Values | Descripction |
+| ------------- | ------ | ------------ |
 | POWER | ON or OFF | Turn On or Off |
 | function | 1 or 2 or 4 | Function selection, 1 = Boos/2 = Silence/4 = Smart |
 | mode | 1 or 2 or 4 | Mode selection, 1 = Cool, 2 = Heat, 4 = Auto |
