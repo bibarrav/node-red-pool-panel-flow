@@ -23,7 +23,7 @@ Replace:
 ### Usage
 The flow is configured to resolve authentication every 24 hours or when the token needs to be renewed, and get all status automatically every 60 secs.
 
-Status information published to MQTT (Names are case sensitive) on ``tele/pool-panel/info`` topic, and the message is a JSON with the fllowing properties:
+Status information is published to MQTT on ``tele/pool-panel/info`` topic, and the message is a JSON with the following properties (Names are case sensitive):
 
 | Property Name | Values | Description |
 | ------------- | ------ | ----------- |
@@ -46,7 +46,7 @@ Commands are subscribed on MQTT with the topic ``cmnd/pool-panel/{PROPERTY}`` in
 | Property name | Values | Descripction |
 | ------------- | ------ | ------------ |
 | POWER | ON or OFF | Turn On or Off |
-| function | 1 or 2 or 4 | Function selection, 1 = Boos/2 = Silence/4 = Smart |
+| function | 1 or 2 or 4 | Function selection, 1 = Boost, 2 = Silence, 4 = Smart |
 | mode | 1 or 2 or 4 | Mode selection, 1 = Cool, 2 = Heat, 4 = Auto |
 | heattemp | 16-34 | Set target temperature for Heat mode |
 | cooltemp | 16-34 | Set target temperature for Cool mode |
